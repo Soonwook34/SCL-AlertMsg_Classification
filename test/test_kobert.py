@@ -15,8 +15,7 @@ from transformers.optimization import get_cosine_schedule_with_warmup
 class BERTDataset(Dataset):
     def __init__(self, dataset, sent_idx, label_idx, bert_tokenizer, max_len,
                  pad, pair):
-        transform = nlp.data.BERTSentenceTransform(
-            bert_tokenizer, max_seq_length=max_len, pad=pad, pair=pair)
+        transform = nlp.data.BERTSentenceTransform(bert_tokenizer, max_seq_length=max_len, pad=pad, pair=pair)
 
         self.sentences = [transform([i[sent_idx]]) for i in dataset]
         self.labels = [np.int32(i[label_idx]) for i in dataset]
@@ -43,11 +42,13 @@ class BERTClassifier(nn.Module):
         if dr_rate:
             self.dropout = nn.Dropout(p=dr_rate)
 
+
     def gen_attention_mask(self, token_ids, valid_length):
         attention_mask = torch.zeros_like(token_ids)
         for i, v in enumerate(valid_length):
             attention_mask[i][:v] = 1
         return attention_mask.float()
+
 
     def forward(self, token_ids, valid_length, segment_ids):
         attention_mask = self.gen_attention_mask(token_ids, valid_length)
@@ -68,24 +69,26 @@ def calc_accuracy(X, Y):
 def run_KoBERT():
     torch.multiprocessing.freeze_support()
 
-    ##GPU 사용 시
+    # GPU 사용 시
     device = torch.device("cuda")
-    ##CPU 사용 시
+    # # CPU 사용 시
     # device = torch.device("cpu")
 
     bertmodel, vocab = get_pytorch_kobert_model()
 
+    # Train, Test 텍스트 데이터 로드 (Train: 150,000개 / Test: 50,000개)
     dataset_train = nlp.data.TSVDataset("ratings_train.txt", field_indices=[1, 2], num_discard_samples=1)
     dataset_test = nlp.data.TSVDataset("ratings_test.txt", field_indices=[1, 2], num_discard_samples=1)
 
+    # 기본 Bert Tokenizer 사용
     tokenizer = get_tokenizer()
     tok = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
 
-    ## Setting parameters
-    max_len = 64
-    batch_size = 64
+    # Setting Hyper Parameters
+    max_len = 64        # 한 문장의 최대 토큰 수 # 64
+    batch_size = 64     # 64
     warmup_ratio = 0.1
-    num_epochs = 5
+    num_epochs = 5      # 5
     max_grad_norm = 1
     log_interval = 200
     learning_rate = 5e-5
@@ -101,7 +104,8 @@ def run_KoBERT():
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ['bias', 'LayerNorm.weight']
     optimizer_grouped_parameters = [
-        {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+        {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+         'weight_decay': 0.01},
         {'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
     ]
 
@@ -134,6 +138,8 @@ def run_KoBERT():
                 print("epoch {} batch id {} loss {} train acc {}".format(e + 1, batch_id + 1, loss.data.cpu().numpy(),
                                                                          train_acc / (batch_id + 1)))
         print("epoch {} train acc {}".format(e + 1, train_acc / (batch_id + 1)))
+        torch.save(model, "model_test_kobert.pt")
+        torch.cuda.empty_cache()
         model.eval()
         for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_dataloader)):
             token_ids = token_ids.long().to(device)
@@ -147,5 +153,5 @@ def run_KoBERT():
 
 if __name__ == '__main__':
     print(torch.cuda.get_device_name(0))
-    run_KoBERT()
+    # run_KoBERT()
 
