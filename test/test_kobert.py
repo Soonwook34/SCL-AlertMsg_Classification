@@ -10,6 +10,7 @@ from kobert.utils import get_tokenizer
 from kobert.pytorch_kobert import get_pytorch_kobert_model
 from transformers import AdamW
 from transformers.optimization import get_cosine_schedule_with_warmup
+from torch.nn import DataParallel
 
 
 class BERTDataset(Dataset):
@@ -42,13 +43,11 @@ class BERTClassifier(nn.Module):
         if dr_rate:
             self.dropout = nn.Dropout(p=dr_rate)
 
-
     def gen_attention_mask(self, token_ids, valid_length):
         attention_mask = torch.zeros_like(token_ids)
         for i, v in enumerate(valid_length):
             attention_mask[i][:v] = 1
         return attention_mask.float()
-
 
     def forward(self, token_ids, valid_length, segment_ids):
         attention_mask = self.gen_attention_mask(token_ids, valid_length)
@@ -69,10 +68,15 @@ def calc_accuracy(X, Y):
 def run_KoBERT():
     torch.multiprocessing.freeze_support()
 
+    device = None
     # GPU 사용 시
-    device = torch.device("cuda")
-    # # CPU 사용 시
-    # device = torch.device("cpu")
+    if torch.cuda.is_available():
+        print("GPU 사용...")
+        device = torch.device("cuda")
+    # CPU 사용 시
+    else:
+        print("CPU 사용...")
+        device = torch.device("cpu")
 
     bertmodel, vocab = get_pytorch_kobert_model()
 
@@ -85,10 +89,10 @@ def run_KoBERT():
     tok = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
 
     # Setting Hyper Parameters
-    max_len = 64        # 한 문장의 최대 토큰 수 # 64
-    batch_size = 64     # 64
+    max_len = 64        # 한 문장의 최대 토큰 수: 64
+    batch_size = 64     # batch 크기 : 64
     warmup_ratio = 0.1
-    num_epochs = 5      # 5
+    num_epochs = 5      # epoch 수: 5
     max_grad_norm = 1
     log_interval = 200
     learning_rate = 5e-5
@@ -117,6 +121,11 @@ def run_KoBERT():
 
     scheduler = get_cosine_schedule_with_warmup(optimizer, num_warmup_steps=warmup_step, num_training_steps=t_total)
 
+    # GPU가 여러개이면 torch.nn.DataParallel 실행
+    if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+        print("DataParallel 사용...")
+        model = DataParallel(model)
+
     for e in range(num_epochs):
         train_acc = 0.0
         test_acc = 0.0
@@ -138,8 +147,10 @@ def run_KoBERT():
                 print("epoch {} batch id {} loss {} train acc {}".format(e + 1, batch_id + 1, loss.data.cpu().numpy(),
                                                                          train_acc / (batch_id + 1)))
         print("epoch {} train acc {}".format(e + 1, train_acc / (batch_id + 1)))
+
         torch.save(model, "model_test_kobert.pt")
         torch.cuda.empty_cache()
+
         model.eval()
         for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_dataloader)):
             token_ids = token_ids.long().to(device)
@@ -152,6 +163,4 @@ def run_KoBERT():
 
 
 if __name__ == '__main__':
-    print(torch.cuda.get_device_name(0))
-    # run_KoBERT()
-
+    run_KoBERT()
