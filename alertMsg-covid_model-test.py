@@ -71,7 +71,7 @@ def testModel():
     if torch.cuda.is_available():
         print("GPU 사용...")
         device = torch.device("cuda")
-        model.load_state_dict(torch.load("model_covid-classification_state-dict.pt"))
+        model.load_state_dict(torch.load("model_covid-classification_state-dict.pt"), strict=False)
         model.to(device)
     # CPU 사용 시
     else:
@@ -82,8 +82,10 @@ def testModel():
     model.eval()
 
     # 테스트 문장 예측
-    # {0: '보건소방문', 1: '캠페인', 2: '확진자발생'}
-    test_sentence = "[순천시청] 코로나19 감염이 인근(목포, 광주)에서 지속 발생하고 있습니다. 개개인이 방역주체가 되어 마스크 착용 등 방역수칙을 반드시 준수 바랍니다. "
+    mapping_dict = {0: '보건소방문', 1: '캠페인', 2: '확진자발생'}
+    # test_sentence = "[순천시청] 코로나19 감염이 인근(목포, 광주)에서 지속 발생하고 있습니다. 개개인이 방역주체가 되어 마스크 착용 등 방역수칙을 반드시 준수 바랍니다. "
+    # test_sentence = "[진주시청]6.29 20:38~22:35 국가대표고기집 호탄점을 이용하신 분은 진주시보건소(749-5714)로 연락바랍니다. "
+    test_sentence = "[의정부시청] 코로나19 추가 확진자 발생【양주시 거주(2명)】 의정부시 관내(확진자) 동선은 시 홈페이지 및 블로그 참고 바랍니다. "
     test_label = 1
 
     unseen_test = pd.DataFrame([[test_sentence, test_label]], columns=[['MESSAGE', 'CATEGORY']])
@@ -96,7 +98,8 @@ def testModel():
         segment_ids = segment_ids.long().to(device)
         valid_length = valid_length
         out = model(token_ids, valid_length, segment_ids)
-        print(out)
+        indices = out.data.max(1).indices
+        print(f"\n{test_sentence} : {mapping_dict[indices.item()]}")
 
 
 if __name__ == '__main__':
