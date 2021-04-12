@@ -1,17 +1,17 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
+from torch.nn import DataParallel
+from torch.utils.data import Dataset
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
 import gluonnlp as nlp
 import numpy as np
 from tqdm import tqdm
+import pandas as pd
 from kobert.utils import get_tokenizer
 from kobert.pytorch_kobert import get_pytorch_kobert_model
 from transformers import AdamW
 from transformers.optimization import get_cosine_schedule_with_warmup
-from torch.nn import DataParallel
-
 
 class BERTDataset(Dataset):
     def __init__(self, dataset, sent_idx, label_idx, bert_tokenizer, max_len,
@@ -32,7 +32,7 @@ class BERTClassifier(nn.Module):
     def __init__(self,
                  bert,
                  hidden_size=768,
-                 num_classes=2,
+                 num_classes=3,     # 분류 개수에 따라 수정
                  dr_rate=None,
                  params=None):
         super(BERTClassifier, self).__init__()
@@ -80,9 +80,9 @@ def run_KoBERT():
 
     bertmodel, vocab = get_pytorch_kobert_model()
 
-    # Train, Test 텍스트 데이터 로드 (Train: 150,000개 / Test: 50,000개)
-    dataset_train = nlp.data.TSVDataset("ratings_train.txt", field_indices=[1, 2], num_discard_samples=1)
-    dataset_test = nlp.data.TSVDataset("ratings_test.txt", field_indices=[1, 2], num_discard_samples=1)
+    # Train, Test 텍스트 데이터 로드
+    dataset_train = nlp.data.TSVDataset("covid_train.txt", field_indices=[1, 2], num_discard_samples=1)
+    dataset_test = nlp.data.TSVDataset("covid_test.txt", field_indices=[1, 2], num_discard_samples=1)
 
     # 기본 Bert Tokenizer 사용
     tokenizer = get_tokenizer()
