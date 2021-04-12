@@ -57,7 +57,7 @@ class BERTClassifier(nn.Module):
 
 def testModel():
     torch.multiprocessing.freeze_support()
-
+    torch.cuda.empty_cache()
     device = None
     # GPU 사용 시
     if torch.cuda.is_available():
@@ -68,15 +68,17 @@ def testModel():
         print("CPU 사용...")
         device = torch.device("cpu")
 
-    model = torch.load("model_covid-classification.pt")
-    model.to(device)
-    model.eval()
-
     bertmodel, vocab = get_pytorch_kobert_model()
     # 기본 Bert Tokenizer 사용
     tokenizer = get_tokenizer()
     tok = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
     max_len = 64
+
+    model = BERTClassifier(bertmodel, dr_rate=0.5).to(device)
+    # model = torch.load("model_covid-classification.pt")
+    model.load_state_dict(torch.load("model_covid-classification_state-dict.pt"))
+    model.to(device)
+    model.eval()
 
     # 테스트 문장 예측
     # {0: '보건소방문', 1: '캠페인', 2: '확진자발생'}
