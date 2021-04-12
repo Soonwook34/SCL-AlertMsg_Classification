@@ -1,4 +1,5 @@
 import torch
+from torch import nn
 from torch.utils.data import Dataset
 from kobert.utils import get_tokenizer
 import numpy as np
