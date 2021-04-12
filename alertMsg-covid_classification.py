@@ -2,8 +2,6 @@ import torch
 from torch import nn
 from torch.nn import DataParallel
 from torch.utils.data import Dataset
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
 import gluonnlp as nlp
 import numpy as np
 from tqdm import tqdm
@@ -148,9 +146,8 @@ def run_KoBERT():
                                                                          train_acc / (batch_id + 1)))
         print("epoch {} train acc {}".format(e + 1, train_acc / (batch_id + 1)))
 
-        torch.save(model, "model_test_kobert.pt")
-        torch.cuda.empty_cache()
-
+        torch.save(model, "model_covid-classification.pt")
+        # torch.cuda.empty_cache()
         model.eval()
         for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_dataloader)):
             token_ids = token_ids.long().to(device)
