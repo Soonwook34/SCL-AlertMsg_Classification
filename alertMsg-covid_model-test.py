@@ -110,6 +110,7 @@ def testModel():
 
     precision = 0
     recall = 0
+    f1_score = 0
     for i in range(0, 3):
         print(con_matrix[i])
         TP = con_matrix[i][i]
@@ -124,6 +125,7 @@ def testModel():
     precision /= 3
     recall /= 3
     f1_score = 2 * (precision * recall) / (precision + recall)
+
     print(f"Precision : {precision:.3f}\nRecall : {recall:.3f}\nF1-Score : {f1_score:.3f}")
 
 
