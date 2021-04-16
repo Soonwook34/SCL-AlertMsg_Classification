@@ -133,7 +133,7 @@ def testModel():
     recall /= 3
     f1_score = 2 * (precision * recall) / (precision + recall)
 
-    print(f"Accuracy : {accuracy:.3f}\nPrecision : {precision:.3f}\nRecall : {recall:.3f}\nF1-Score : {f1_score:.3f}")
+    print(f"Accuracy : {accuracy:.6f}\nPrecision : {precision:.6f}\nRecall : {recall:.6f}\nF1-Score : {f1_score:.6f}")
 
 
 if __name__ == '__main__':
