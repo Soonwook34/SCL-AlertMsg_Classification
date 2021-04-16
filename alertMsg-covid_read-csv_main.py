@@ -15,8 +15,13 @@ dataset_train1.drop(["SUB"], axis=1, inplace=True)
 data1 = dataset_train1.loc[dataset_train1["CATEGORY"] == "확진자발생"]
 data2 = dataset_train1.loc[dataset_train1["CATEGORY"] == "보건소방문"]
 data3 = dataset_train1.loc[dataset_train1["CATEGORY"] == "안내"]
-new_data = data1.append([data2, data3], sort=False)
+# new_data = data1.append([data2, data3], sort=False)
+# new_df = pd.DataFrame(new_data)
+new_df1 = pd.DataFrame(data1)
+new_df1 = new_df1.sample(frac=1).head(10000)
+new_data = data2.append([data3], sort=False)
 new_df = pd.DataFrame(new_data)
+new_df = pd.concat([new_df1, new_df], ignore_index=True)
 new_df = new_df[["MESSAGE", "CATEGORY"]]
 # new_data = dataset_train1
 # print(new_data.head())
@@ -39,6 +44,6 @@ print(train.head())
 print("test shape is:", len(test))
 print(test.head())
 
-train.to_csv("./covid_train.txt", sep="\t", na_rep="NaN")
-test.to_csv("./covid_test.txt", sep="\t", na_rep="NaN")
+train.to_csv("./covid_train_main.txt", sep="\t", na_rep="NaN")
+test.to_csv("./covid_test_main.txt", sep="\t", na_rep="NaN")
 
