@@ -55,6 +55,12 @@ class BERTClassifier(nn.Module):
         return self.classifier(out)
 
 
+def calc_accuracy(X, Y):
+    max_vals, max_indices = torch.max(X, 1)
+    train_acc = (max_indices == Y).sum().data.cpu().numpy() / max_indices.size()[0]
+    return train_acc
+
+
 def testModel():
     torch.multiprocessing.freeze_support()
     torch.cuda.empty_cache()
@@ -86,15 +92,16 @@ def testModel():
     # tttt = [["[중대본]4.2.~9. 성남시 분당구 소재 도우미 이용 노래방 방문자·근무자는 가까운 보건소 선별진료소에서 코로나19 검사를 받으시기 바랍니다(☎120,1339)", 0],
     #         ["[용인시청] 4월10일 확진자18명[(용인 2243~2260번) ▶처인구2, 기흥구3, 수지구12, 수원시1] 발생하였습니다. corona.yongin.go.kr", 2],
     #         ["[순천시청] 코로나19 감염이 인근(목포, 광주)에서 지속 발생하고 있습니다. 개개인이 방역주체가 되어 마스크 착용 등 방역수칙을 반드시 준수 바랍니다. ", 1]]
-    unseen_test = nlp.data.TSVDataset("covid_test.txt", field_indices=[1, 2], num_discard_samples=1)
     # unseen_test = pd.DataFrame([[test_sentence, test_label]], columns=[['MESSAGE', 'CATEGORY']])
     # unseen_test = pd.DataFrame(tttt, columns=[['MESSAGE', 'CATEGORY']])
     # unseen_values = unseen_test.values
+    unseen_test = nlp.data.TSVDataset("covid_test.txt", field_indices=[1, 2], num_discard_samples=1)
     test_set = BERTDataset(unseen_test, 0, 1, tok, max_len, True, False)
     test_input = torch.utils.data.DataLoader(test_set, batch_size=1, num_workers=5)
 
     con_matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
+    accuracy = 0
     for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_input)):
         token_ids = token_ids.long().to(device)
         segment_ids = segment_ids.long().to(device)
@@ -103,11 +110,11 @@ def testModel():
         out = model(token_ids, valid_length, segment_ids)
 
         max_vals, max_indices = torch.max(out, 1)
-        # train_acc = (max_indices == label).sum().data.cpu().numpy() / max_indices.size()[0]
+        accuracy += calc_accuracy(out, label)
         con_matrix[label][max_indices.item()] += 1
         # print(f"\n{tttt[batch_id][0]} : {mapping_dict[max_indices.item()]}")
-        # print(train_acc)
 
+    accuracy /= (batch_id + 1)
     precision = 0
     recall = 0
     f1_score = 0
@@ -126,7 +133,7 @@ def testModel():
     recall /= 3
     f1_score = 2 * (precision * recall) / (precision + recall)
 
-    print(f"Precision : {precision:.3f}\nRecall : {recall:.3f}\nF1-Score : {f1_score:.3f}")
+    print(f"Accuracy : {accuracy:.3f}\nPrecision : {precision:.3f}\nRecall : {recall:.3f}\nF1-Score : {f1_score:.3f}")
 
 
 if __name__ == '__main__':
