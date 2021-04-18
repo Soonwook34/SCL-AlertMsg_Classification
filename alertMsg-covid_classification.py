@@ -30,7 +30,7 @@ class BERTClassifier(nn.Module):
     def __init__(self,
                  bert,
                  hidden_size=768,
-                 num_classes=3,     # 분류 개수에 따라 수정
+                 num_classes=5,     # 분류 개수에 따라 수정
                  dr_rate=None,
                  params=None):
         super(BERTClassifier, self).__init__()
@@ -79,8 +79,8 @@ def run_KoBERT():
     bertmodel, vocab = get_pytorch_kobert_model()
 
     # Train, Test 텍스트 데이터 로드
-    dataset_train = nlp.data.TSVDataset("covid_train_sub.txt", field_indices=[1, 2], num_discard_samples=1)
-    dataset_test = nlp.data.TSVDataset("covid_test_sub.txt", field_indices=[1, 2], num_discard_samples=1)
+    dataset_train = nlp.data.TSVDataset("covid_train_all5.txt", field_indices=[1, 2], num_discard_samples=1)
+    dataset_test = nlp.data.TSVDataset("covid_test_all5.txt", field_indices=[1, 2], num_discard_samples=1)
 
     # 기본 Bert Tokenizer 사용
     tokenizer = get_tokenizer()
