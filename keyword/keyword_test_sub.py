@@ -1,6 +1,6 @@
 import pandas as pd
 
-dataset = pd.read_csv("../AM_210329_COVID4.csv", encoding="utf-8")
+dataset = pd.read_csv("../csv/AM_210329_COVID4.csv", encoding="utf-8")
 
 message_list = dataset["MESSAGE"].values.tolist()
 sub_list = dataset["SUB"].values.tolist()

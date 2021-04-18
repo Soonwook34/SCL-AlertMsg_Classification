@@ -1,7 +1,7 @@
 from eunjeon import Mecab
 import pandas as pd
 
-dataset = pd.read_csv("../AM_210329_COVID2.csv", encoding="utf-8")
+dataset = pd.read_csv("../csv/AM_210329_COVID2.csv", encoding="utf-8")
 
 message_list = dataset["MESSAGE"].values.tolist()
 category_list = dataset["CATEGORY"].values.tolist()

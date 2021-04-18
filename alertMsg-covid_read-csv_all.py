@@ -3,7 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 
 # 학습용 데이터셋 불러오기
-dataset_train1 = pd.read_csv("AM_210329_COVID6.csv", encoding="utf-8")
+dataset_train1 = pd.read_csv("csv/AM_210329_COVID6.csv", encoding="utf-8")
 # print(dataset_train1.head())
 
 # 데이터 전처리
@@ -46,6 +46,6 @@ print(train.head())
 print("test shape is:", len(test))
 print(test.head())
 
-train.to_csv("./covid_train_all5.txt", sep="\t", na_rep="NaN")
-test.to_csv("./covid_test_all5.txt", sep="\t", na_rep="NaN")
+train.to_csv("txt/covid_train_all5.txt", sep="\t", na_rep="NaN")
+test.to_csv("txt/covid_test_all5.txt", sep="\t", na_rep="NaN")
 

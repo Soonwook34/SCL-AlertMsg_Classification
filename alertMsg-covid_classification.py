@@ -79,8 +79,8 @@ def run_KoBERT():
     bertmodel, vocab = get_pytorch_kobert_model()
 
     # Train, Test 텍스트 데이터 로드
-    dataset_train = nlp.data.TSVDataset("covid_train_all5.txt", field_indices=[1, 2], num_discard_samples=1)
-    dataset_test = nlp.data.TSVDataset("covid_test_all5.txt", field_indices=[1, 2], num_discard_samples=1)
+    dataset_train = nlp.data.TSVDataset("txt/covid_train_all5.txt", field_indices=[1, 2], num_discard_samples=1)
+    dataset_test = nlp.data.TSVDataset("txt/covid_test_all5.txt", field_indices=[1, 2], num_discard_samples=1)
 
     # 기본 Bert Tokenizer 사용
     tokenizer = get_tokenizer()
