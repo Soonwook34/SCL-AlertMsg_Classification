@@ -18,7 +18,7 @@ print(len(data))
 model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 embeddings = model.encode(data, show_progress_bar=True)
 
-print(len(embeddings[0]), embeddings[0])
+print(len(embeddings[0]), embeddings[:2])
 
 print("Reduce Dimension Using UMAP...")
 umap_embeddings = umap.UMAP(n_neighbors=15, n_components=5, metric='cosine').fit_transform(embeddings)
@@ -88,8 +88,8 @@ top_n_words = extract_top_n_words_per_topic(tf_idf, count, docs_per_topic, n=20)
 topic_sizes = extract_topic_sizes(docs_df)
 print(len(topic_sizes), topic_sizes.head(10))
 
-for i in range(len(topic_sizes) - 4):
-    print(f"{i + 1} processing...")
+print(f"Reducing {len(topic_sizes) - 6} Dimensions...")
+for i in range(len(topic_sizes) - 6):
     # Calculate cosine similarity
     similarities = cosine_similarity(tf_idf.T)
     np.fill_diagonal(similarities, 0)
@@ -113,3 +113,4 @@ for i in range(len(topic_sizes) - 4):
 
 topic_sizes = extract_topic_sizes(docs_df)
 print(len(topic_sizes), topic_sizes.head(10))
+print(docs_df.head())
