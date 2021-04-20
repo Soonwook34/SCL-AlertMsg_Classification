@@ -126,7 +126,7 @@ print(docs_df.head())
 con_matrix = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
 
 for i in range(0, len(docs_df)):
-    con_matrix[docs_df["CATEGORY"][i]][docs_df["TOPIC"][i]] += 1
+    con_matrix[docs_df["CATEGORY"][i]][docs_df["Topic"][i]] += 1
 
 for i in range(0, 5):
     print(con_matrix[i])
