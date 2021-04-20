@@ -17,7 +17,8 @@ for message in message_list:
     if len(message_split) > 2:
         for message_piece in message_split[2:]:
             new_message = f"{new_message}]{message_piece}"
-    noun_list = mecab.nouns(message.split("]")[1])
+    # noun_list = mecab.nouns(message.split("]")[1])
+    noun_list = mecab.nouns(new_message)
     if len(noun_list) > 0:
         message_noun = noun_list[0]
         for noun in noun_list[1:]:
