@@ -77,13 +77,13 @@ def testModel():
     if torch.cuda.is_available():
         print("GPU 사용...")
         device = torch.device("cuda")
-        model.load_state_dict(torch.load("model_covid-classification_state-dict.pt"), strict=False)
+        model.load_state_dict(torch.load("model/model_covid-classification_state-dict.pt"), strict=False)
         model.to(device)
     # CPU 사용 시
     else:
         print("CPU 사용...")
         device = torch.device("cpu")
-        model.load_state_dict(torch.load("model_covid-classification_state-dict.pt", map_location=device))
+        model.load_state_dict(torch.load("model/model_covid-classification_state-dict.pt", map_location=device))
     # model = torch.load("model_covid-classification.pt")
     model.eval()
 

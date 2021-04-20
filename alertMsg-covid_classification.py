@@ -147,7 +147,7 @@ def run_KoBERT():
         print("epoch {} train acc {}".format(e + 1, train_acc / (batch_id + 1)))
 
         # torch.save(model, "model_covid-classification.pt")
-        torch.save(model.module.state_dict(), "model_covid-classification_state-dict.pt")
+        torch.save(model.module.state_dict(), "model/model_covid-classification_state-dict.pt")
         # torch.cuda.empty_cache()
         model.eval()
         for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_dataloader)):
