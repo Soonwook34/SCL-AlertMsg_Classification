@@ -1,3 +1,4 @@
+from sklearn.cluster import KMeans
 from sklearn.datasets import fetch_20newsgroups
 from sentence_transformers import SentenceTransformer
 import umap
@@ -23,8 +24,11 @@ print(len(embeddings[0]), embeddings[:2])
 print("Reduce Dimension Using UMAP...")
 umap_embeddings = umap.UMAP(n_neighbors=15, n_components=5, metric='cosine').fit_transform(embeddings)
 
-print("Clustering Using HDBSCAN...")
-cluster = hdbscan.HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selection_method='eom').fit(umap_embeddings)
+print("Clustering Using KMeans...")
+cluster = KMeans(n_clusters=5).fit_predict(umap_embeddings)
+# print("Clustering Using HDBSCAN...")
+# cluster = hdbscan.HDBSCAN(min_cluster_size=30, metric='euclidean', cluster_selection_method='eom').fit(umap_embeddings)
+
 
 print("Save pyplot Image...")
 # Prepare data
