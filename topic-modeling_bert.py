@@ -18,10 +18,12 @@ print(len(data))
 model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 embeddings = model.encode(data, show_progress_bar=True)
 
-print(embeddings[:2])
+print(len(embeddings[0]), embeddings[0])
 
+print("Reduce Dimension Using UMAP...")
 umap_embeddings = umap.UMAP(n_neighbors=15, n_components=5, metric='cosine').fit_transform(embeddings)
 
+print("Clustering Using HDBSCAN...")
 cluster = hdbscan.HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selection_method='eom').fit(umap_embeddings)
 
 print("Save pyplot Image...")
@@ -37,7 +39,7 @@ plt.scatter(outliers.x, outliers.y, color='#BDBDBD', s=0.05)
 plt.scatter(clustered.x, clustered.y, c=clustered.labels, s=0.05, cmap='hsv_r')
 plt.colorbar()
 plt.show()
-plt.savefig("BERTopic.png")
+plt.savefig("BERTopic.png", dpi=200)
 
 docs_df = pd.DataFrame(data, columns=["Doc"])
 docs_df['Topic'] = cluster.labels_
@@ -46,7 +48,7 @@ docs_per_topic = docs_df.groupby(['Topic'], as_index=False).agg({'Doc': ' '.join
 
 
 def c_tf_idf(documents, m, ngram_range=(1, 1)):
-    stopwords = ['의', '가', '이', '은', '들', '는', '좀', '잘', '걍', '과', '도', '를', '으로', '자', '에', '와', '한', '하다', '바랍니다', '습니다', '하십시오']
+    stopwords = ['의', '가', '이', '은', '들', '는', '좀', '잘', '걍', '과', '도', '를', '을', '으로', '자', '에', '와', '한', '하다', '바랍니다', '습니다', '하십시오']
     count = CountVectorizer(ngram_range=ngram_range, stop_words=stopwords).fit(documents)
     t = count.transform(documents).toarray()
     w = t.sum(axis=1)
@@ -86,7 +88,7 @@ top_n_words = extract_top_n_words_per_topic(tf_idf, count, docs_per_topic, n=20)
 topic_sizes = extract_topic_sizes(docs_df)
 print(len(topic_sizes), topic_sizes.head(10))
 
-for i in range(len(topic_sizes) - 5):
+for i in range(len(topic_sizes) - 4):
     print(f"{i + 1} processing...")
     # Calculate cosine similarity
     similarities = cosine_similarity(tf_idf.T)
