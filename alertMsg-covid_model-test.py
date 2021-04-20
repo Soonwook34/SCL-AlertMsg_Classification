@@ -28,7 +28,7 @@ class BERTClassifier(nn.Module):
     def __init__(self,
                  bert,
                  hidden_size=768,
-                 num_classes=3,  # 분류 개수에 따라 수정
+                 num_classes=5,  # 분류 개수에 따라 수정
                  dr_rate=None,
                  params=None):
         super(BERTClassifier, self).__init__()
@@ -95,11 +95,11 @@ def testModel():
     # unseen_test = pd.DataFrame([[test_sentence, test_label]], columns=[['MESSAGE', 'CATEGORY']])
     # unseen_test = pd.DataFrame(tttt, columns=[['MESSAGE', 'CATEGORY']])
     # unseen_values = unseen_test.values
-    unseen_test = nlp.data.TSVDataset("txt/covid_test_sub.txt", field_indices=[1, 2], num_discard_samples=1)
+    unseen_test = nlp.data.TSVDataset("txt/covid_test_all5.txt", field_indices=[1, 2], num_discard_samples=1)
     test_set = BERTDataset(unseen_test, 0, 1, tok, max_len, True, False)
     test_input = torch.utils.data.DataLoader(test_set, batch_size=1, num_workers=5)
 
-    con_matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    con_matrix = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0 ,0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
 
     accuracy = 0
     for batch_id, (token_ids, valid_length, segment_ids, label) in enumerate(tqdm(test_input)):
@@ -118,19 +118,19 @@ def testModel():
     precision = 0
     recall = 0
     f1_score = 0
-    for i in range(0, 3):
+    for i in range(0, 5):
         print(con_matrix[i])
         TP = con_matrix[i][i]
         FP = 0
         FN = 0
-        for j in range(0, 3):
+        for j in range(0, 5):
             if j != i:
                 FP += con_matrix[j][i]
                 FN += con_matrix[i][j]
         precision += (TP / (TP + FP))
         recall += (TP / (TP + FN))
-    precision /= 3
-    recall /= 3
+    precision /= 5
+    recall /= 5
     f1_score = 2 * (precision * recall) / (precision + recall)
 
     print(f"Accuracy : {accuracy:.6f}\nPrecision : {precision:.6f}\nRecall : {recall:.6f}\nF1-Score : {f1_score:.6f}")
