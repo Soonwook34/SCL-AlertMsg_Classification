@@ -34,7 +34,8 @@ print("Save pyplot Image...")
 # Prepare data
 umap_data = umap.UMAP(n_neighbors=15, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
 result = pd.DataFrame(umap_data, columns=['x', 'y'])
-result['labels'] = cluster.labels_
+# result['labels'] = cluster.labels_
+result['labels'] = cluster
 # Visualize clusters
 fig, ax = plt.subplots(figsize=(20, 10))
 outliers = result.loc[result.labels == -1, :]
@@ -46,7 +47,8 @@ plt.show()
 plt.savefig("BERTopic.png", dpi=200)
 
 docs_df = pd.DataFrame(data, columns=["Doc"])
-docs_df['Topic'] = cluster.labels_
+# docs_df['Topic'] = cluster.labels_
+docs_df['Topic'] = cluster
 docs_df['Doc_ID'] = range(len(docs_df))
 docs_per_topic = docs_df.groupby(['Topic'], as_index=False).agg({'Doc': ' '.join})
 
