@@ -11,6 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 dataset = pd.read_csv("csv/AM_210329_COVID7.csv", encoding="utf-8")
 data = dataset["MESSAGE"].values.tolist()
+category = dataset["CATEGORY"]
 # data = fetch_20newsgroups(subset='all')['data']
 
 print(len(data))
@@ -50,6 +51,7 @@ docs_df = pd.DataFrame(data, columns=["Doc"])
 # docs_df['Topic'] = cluster.labels_
 docs_df['Topic'] = cluster
 docs_df['Doc_ID'] = range(len(docs_df))
+docs_df['CATEGORY'] = category
 docs_per_topic = docs_df.groupby(['Topic'], as_index=False).agg({'Doc': ' '.join})
 
 
@@ -120,3 +122,39 @@ for i in range(len(topic_sizes) - 6):
 topic_sizes = extract_topic_sizes(docs_df)
 print(len(topic_sizes), topic_sizes.head(10))
 print(docs_df.head())
+
+con_matrix = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+
+for i in range(0, len(docs_df)):
+    con_matrix[docs_df["CATEGORY"][i]][docs_df["TOPIC"][i]] += 1
+
+for i in range(0, 3):
+    print(con_matrix[i])
+
+
+con_matrix = [[2723, 272, 177],
+              [2180, 225, 52],
+              [418, 1037, 1888]]
+accuracy = 0
+for i in range(0, 3):
+    accuracy += con_matrix[i][i]
+accuracy /= len(dataset)
+precision = 0
+recall = 0
+f1_score = 0
+for i in range(0, 3):
+    print(con_matrix[i])
+    TP = con_matrix[i][i]
+    FP = 0
+    FN = 0
+    for j in range(0, 3):
+        if j != i:
+            FP += con_matrix[j][i]
+            FN += con_matrix[i][j]
+    precision += (TP / (TP + FP))
+    recall += (TP / (TP + FN))
+precision /= 3
+recall /= 3
+f1_score = 2 * (precision * recall) / (precision + recall)
+
+print(f"Accuracy : {accuracy:.6f}\nF1-Score : {f1_score:.6f}(Precision : {precision:.6f} Recall : {recall:.6f})")
