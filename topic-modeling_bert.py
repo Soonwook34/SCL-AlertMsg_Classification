@@ -12,7 +12,6 @@ data = fetch_20newsgroups(subset='all')['data']
 
 print(len(data))
 
-
 model = SentenceTransformer('distilbert-base-nli-mean-tokens')
 # model = SentenceTransformer("distiluse-base-multilingual-cased-v1")
 embeddings = model.encode(data, show_progress_bar=True)
@@ -27,7 +26,6 @@ cluster = hdbscan.HDBSCAN(min_cluster_size=15, metric='euclidean', cluster_selec
 # umap_data = umap.UMAP(n_neighbors=15, n_components=2, min_dist=0.0, metric='cosine').fit_transform(embeddings)
 # result = pd.DataFrame(umap_data, columns=['x', 'y'])
 # result['labels'] = cluster.labels_
-#
 # # Visualize clusters
 # fig, ax = plt.subplots(figsize=(20, 10))
 # outliers = result.loc[result.labels == -1, :]
@@ -82,8 +80,8 @@ top_n_words = extract_top_n_words_per_topic(tf_idf, count, docs_per_topic, n=20)
 topic_sizes = extract_topic_sizes(docs_df)
 print(len(topic_sizes), topic_sizes.head(10))
 
-
-for i in range(20):
+for i in range(len(topic_sizes) - 1):
+    print(f"{i + 1} processing...")
     # Calculate cosine similarity
     similarities = cosine_similarity(tf_idf.T)
     np.fill_diagonal(similarities, 0)
@@ -98,7 +96,7 @@ for i in range(20):
     old_topics = docs_df.sort_values("Topic").Topic.unique()
     map_topics = {old_topic: index - 1 for index, old_topic in enumerate(old_topics)}
     docs_df.Topic = docs_df.Topic.map(map_topics)
-    docs_per_topic = docs_df.groupby(['Topic'], as_index = False).agg({'Doc': ' '.join})
+    docs_per_topic = docs_df.groupby(['Topic'], as_index=False).agg({'Doc': ' '.join})
 
     # Calculate new topic words
     m = len(data)
